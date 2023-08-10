@@ -41,6 +41,14 @@ def check_win(board, player_symbol):
         
     return False
 
+def check_tie(board):
+    for row in board:
+        for cell in row:
+            if cell not in ['X', 'O']:
+                return False  # The board still has empty cells
+    return True
+
+
 
 updated_board = player_move_simulation(initial_board, player_symbol, 2)
 display_output = display_board(updated_board)
