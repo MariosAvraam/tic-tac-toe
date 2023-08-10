@@ -27,5 +27,20 @@ def player_move_simulation(board, player_symbol, simulated_input):
             print("Please enter a valid number between 1-9.")
     return board
 
+def check_win(board, player_symbol):
+    # Check rows, columns, and diagonals
+    for i in range(3):
+        if all([cell == player_symbol for cell in board[i]]) or \
+           all([board[j][i] == player_symbol for j in range(3)]):
+            return True
+            
+    if board[0][0] == player_symbol and board[1][1] == player_symbol and board[2][2] == player_symbol:
+        return True
+    if board[0][2] == player_symbol and board[1][1] == player_symbol and board[2][0] == player_symbol:
+        return True
+        
+    return False
+
+
 updated_board = player_move_simulation(initial_board, player_symbol, 2)
 display_output = display_board(updated_board)
