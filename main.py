@@ -164,5 +164,5 @@ def tic_tac_toe_interactive():
         current_player = PLAYER_O if current_player == PLAYER_X else PLAYER_X
 
 # Note for GitHub users: To start the game, uncomment the line below and run the script.
-tic_tac_toe_interactive()
+# tic_tac_toe_interactive()
 
