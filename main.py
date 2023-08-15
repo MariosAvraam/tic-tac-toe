@@ -1,13 +1,19 @@
 def display_board(board):
     """
-    Display the current state of the game board.
+    Display the current state of the game board with consistent cell width.
     
     Parameters:
     - board (list of lists): The game board represented as a 2D list.
     """
+    size = len(board)
+    # Determine the maximum width needed for the numbers
+    max_width = len(str(size * size))
+    
     for row in board:
-        print(" | ".join(row))
-        print("-" * (len(board) * 3))
+        # Format each cell to have a consistent width
+        formatted_row = [f"{cell:^{max_width}}" for cell in row]
+        print(" | ".join(formatted_row))
+        print("-" * (size * (max_width + 2) ))  # Adjust the line length based on cell width
 
 def get_board_size():
     """
@@ -138,5 +144,5 @@ def tic_tac_toe_interactive():
         current_player = 'O' if current_player == 'X' else 'X'
 
 # Note for GitHub users: To start the game, uncomment the line below and run the script.
-# tic_tac_toe_interactive()
+tic_tac_toe_interactive()
 
