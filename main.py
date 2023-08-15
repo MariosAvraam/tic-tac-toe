@@ -3,34 +3,62 @@ def display_board(board):
         print(" | ".join(row))
         print("-" * 9)
 
-def player_move(board, player_symbol):
+def get_board_size():
+    while True:
+        try:
+            size = int(input("Enter board size (e.g., 3 for 3x3, 4 for 4x4, etc.): "))
+            if size >= 3:  # Let's assume a minimum size of 3x3 for the game to be meaningful
+                return size
+            else:
+                print("Please enter a size of 3 or greater.")
+        except ValueError:
+            print("Please enter a valid number.")
+
+def create_board(size):
+    return [[str(i * size + j + 1) for j in range(size)] for i in range(size)]
+
+
+def player_move_dynamic(board, player_symbol):
     valid_move = False
+    size = len(board)
     while not valid_move:
         try:
-            move = int(input(f"{player_symbol}'s move (1-9): "))
-            if 1 <= move <= 9:
-                row, col = (move - 1) // 3, (move - 1) % 3
+            move = int(input(f"{player_symbol}'s move (1-{size*size}): "))
+            if 1 <= move <= size*size:
+                row, col = (move - 1) // size, (move - 1) % size
                 if board[row][col] not in ['X', 'O']:
                     board[row][col] = player_symbol
                     valid_move = True
                 else:
                     print("Cell already taken. Choose another cell.")
             else:
-                print("Invalid move. Choose a number between 1-9.")
+                print(f"Invalid move. Choose a number between 1-{size*size}.")
         except ValueError:
-            print("Please enter a valid number between 1-9.")
+            print(f"Please enter a valid number between 1-{size*size}.")
     return board
 
+# Note: Since this environment is not interactive in the traditional sense, we can't play the game here.
+# However, you can replace your 'player_move' function with the 'player_move_dynamic' function in your code
+# and then run it in your local Python environment to play the game interactively.
+
 def check_win(board, player_symbol):
-    for i in range(3):
+    size = len(board)
+    
+    # Check rows and columns
+    for i in range(size):
         if all([cell == player_symbol for cell in board[i]]) or \
-           all([board[j][i] == player_symbol for j in range(3)]):
+           all([board[j][i] == player_symbol for j in range(size)]):
             return True
 
-    if board[0][0] == player_symbol and board[1][1] == player_symbol and board[2][2] == player_symbol:
+    # Check main diagonal
+    if all([board[i][i] == player_symbol for i in range(size)]):
         return True
-    if board[0][2] == player_symbol and board[1][1] == player_symbol and board[2][0] == player_symbol:
+
+    # Check the other diagonal
+    if all([board[i][size - 1 - i] == player_symbol for i in range(size)]):
         return True
+
+    return False
 
     return False
 
@@ -42,12 +70,13 @@ def check_tie(board):
     return True
 
 def tic_tac_toe_interactive():
-    board = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']]
+    size = get_board_size()
+    board = create_board(size)
     current_player = 'X'
 
-    for _ in range(9):
+    for _ in range(size * size):  # Adjust the game loop for the board size
         display_board(board)
-        board = player_move(board, current_player)
+        board = player_move_dynamic(board, current_player)
 
         if check_win(board, current_player):
             display_board(board)
@@ -59,8 +88,6 @@ def tic_tac_toe_interactive():
             return
 
         current_player = 'O' if current_player == 'X' else 'X'
-
-    print("It's a tie!")
 
 # When you run this in your local environment, call the function to start the game
 tic_tac_toe_interactive()
