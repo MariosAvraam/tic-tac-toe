@@ -1,3 +1,7 @@
+# Constants for the game
+PLAYER_X = 'X'
+PLAYER_O = 'O'
+
 def display_board(board):
     """
     Display the current state of the game board with consistent cell width.
@@ -6,14 +10,11 @@ def display_board(board):
     - board (list of lists): The game board represented as a 2D list.
     """
     size = len(board)
-    # Determine the maximum width needed for the numbers
     max_width = len(str(size * size))
-    
     for row in board:
-        # Format each cell to have a consistent width
         formatted_row = [f"{cell:^{max_width}}" for cell in row]
         print(" | ".join(formatted_row))
-        print("-" * (size * (max_width + 2) ))  # Adjust the line length based on cell width
+        print("-" * (size * (max_width + 2)))
 
 def get_board_size():
     """
@@ -25,7 +26,7 @@ def get_board_size():
     while True:
         try:
             size = int(input("Enter board size (e.g., 3 for 3x3, 4 for 4x4, etc.): "))
-            if size >= 3:  # Minimum size of 3x3 for the game
+            if size >= 3:
                 return size
             else:
                 print("Please enter a size of 3 or greater.")
@@ -44,34 +45,35 @@ def create_board(size):
     """
     return [[str(i * size + j + 1) for j in range(size)] for i in range(size)]
 
-def player_move_dynamic(board, player_symbol):
+def get_user_input(prompt, valid_choices):
     """
-    Get the next move from the current player and update the board.
+    Get validated input from the user.
     
     Parameters:
-    - board (list of lists): The current game board.
-    - player_symbol (str): The symbol ('X' or 'O') of the current player.
+    - prompt (str): Message to display to the user.
+    - valid_choices (list): List of valid inputs.
     
     Returns:
-    - list of lists: The updated game board.
+    - str: Validated user input.
     """
-    valid_move = False
-    size = len(board)
-    while not valid_move:
-        try:
-            move = int(input(f"{player_symbol}'s move (1-{size*size}): "))
-            if 1 <= move <= size*size:
-                row, col = (move - 1) // size, (move - 1) % size
-                if board[row][col] not in ['X', 'O']:
-                    board[row][col] = player_symbol
-                    valid_move = True
-                else:
-                    print("Cell already taken. Choose another cell.")
-            else:
-                print(f"Invalid move. Choose a number between 1-{size*size}.")
-        except ValueError:
-            print(f"Please enter a valid number between 1-{size*size}.")
-    return board
+    while True:
+        user_input = input(prompt)
+        if user_input in valid_choices:
+            return user_input
+        print(f"Invalid input. Please choose from {', '.join(valid_choices)}.")
+
+def is_win_condition(cells, player_symbol):
+    """
+    Check if the given cells form a win for the player.
+    
+    Parameters:
+    - cells (list): List of cells (either row, column, or diagonal).
+    - player_symbol (str): The player's symbol ('X' or 'O').
+    
+    Returns:
+    - bool: True if the cells form a win condition, False otherwise.
+    """
+    return all(cell == player_symbol for cell in cells)
 
 def check_win(board, player_symbol):
     """
@@ -79,25 +81,20 @@ def check_win(board, player_symbol):
     
     Parameters:
     - board (list of lists): The current game board.
-    - player_symbol (str): The symbol ('X' or 'O') of the current player.
+    - player_symbol (str): The player's symbol ('X' or 'O').
     
     Returns:
     - bool: True if the player has won, False otherwise.
     """
     size = len(board)
     
-    # Check rows and columns
     for i in range(size):
-        if all([cell == player_symbol for cell in board[i]]) or \
-           all([board[j][i] == player_symbol for j in range(size)]):
+        if is_win_condition(board[i], player_symbol) or \
+           is_win_condition([board[j][i] for j in range(size)], player_symbol):
             return True
 
-    # Check main diagonal
-    if all([board[i][i] == player_symbol for i in range(size)]):
-        return True
-
-    # Check the other diagonal
-    if all([board[i][size - 1 - i] == player_symbol for i in range(size)]):
+    if is_win_condition([board[i][i] for i in range(size)], player_symbol) or \
+       is_win_condition([board[i][size - 1 - i] for i in range(size)], player_symbol):
         return True
 
     return False
@@ -112,11 +109,34 @@ def check_tie(board):
     Returns:
     - bool: True if the game is a tie, False otherwise.
     """
-    for row in board:
-        for cell in row:
-            if cell not in ['X', 'O']:
-                return False
-    return True
+    return all(cell in [PLAYER_X, PLAYER_O] for row in board for cell in row)
+
+def player_move_dynamic(board, player_symbol):
+    """
+    Get the next move from the current player and update the board.
+    
+    Parameters:
+    - board (list of lists): The current game board.
+    - player_symbol (str): The symbol ('X' or 'O') of the current player.
+    
+    Returns:
+    - list of lists: The updated game board.
+    """
+    size = len(board)
+    valid_choices = [str(i) for i in range(1, size*size + 1)]
+    
+    valid_move = False
+    while not valid_move:
+        move = get_user_input(f"{player_symbol}'s move (1-{size*size}): ", valid_choices)
+        move = int(move)
+        
+        row, col = (move - 1) // size, (move - 1) % size
+        if board[row][col] not in [PLAYER_X, PLAYER_O]:
+            board[row][col] = player_symbol
+            valid_move = True
+        else:
+            print("Cell already taken. Choose another cell.")
+    return board
 
 def tic_tac_toe_interactive():
     """
@@ -125,9 +145,9 @@ def tic_tac_toe_interactive():
     """
     size = get_board_size()
     board = create_board(size)
-    current_player = 'X'
+    current_player = PLAYER_X
 
-    for _ in range(size * size):  # Adjust the game loop for the board size
+    for _ in range(size * size):
         display_board(board)
         board = player_move_dynamic(board, current_player)
 
@@ -141,7 +161,7 @@ def tic_tac_toe_interactive():
             return
 
         # Switch player
-        current_player = 'O' if current_player == 'X' else 'X'
+        current_player = PLAYER_O if current_player == PLAYER_X else PLAYER_X
 
 # Note for GitHub users: To start the game, uncomment the line below and run the script.
 tic_tac_toe_interactive()
